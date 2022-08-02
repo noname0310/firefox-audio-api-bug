@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>firefox-audio-api-bug</title>
+    <link rel="icon" href="data:,">
+</head>
+
+<body>
+    <button id="play">Play</button>
+    <input id="iterCount" type="number" value="100" min="1" max="1000">
+    <script>
+        async function main() {
+            const playButton = document.getElementById('play');
+            playButton.removeEventListener('click', main);
+            playButton.textContent = "loading...";
+
+            const audioSource = "MoogCity.mp3";
+
+            const audioContext = new AudioContext();
+            const response = await fetch(audioSource);
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            playButton.textContent = "playing...";
+
+            const iterCount = parseInt(document.getElementById('iterCount').value);
+            for (let i = 0; i < iterCount; ++i) {
+                const source = audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+                source.playbackRate.value = 1.1;
+                source.connect(audioContext.destination);
+                source.start(audioContext.currentTime, 10);
+                if (i !== iterCount - 1) source.disconnect();
+            }
+        }
+        document.getElementById("play").addEventListener("click", main);
+    </script>
+</body>
+
+</html>
